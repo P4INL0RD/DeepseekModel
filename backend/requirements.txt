@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[gunicorn]
 python-dotenv
 azure-ai-inference
 azure-core

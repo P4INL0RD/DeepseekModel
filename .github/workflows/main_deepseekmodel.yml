@@ -1,4 +1,4 @@
-name: Build and Deploy Python App to Azure
+name: Deploy to Azure Web App
 
 on:
   push:
@@ -8,11 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -23,31 +24,40 @@ jobs:
           source venv/bin/activate
           pip install -r backend/requirements.txt
 
-      - name: Create Deployment Package
+      - name: Prepare artifact
         run: |
-          mkdir -p package
-          cp -r backend/* package/
-          cp -r venv package/venv  # No es recomendable, mejor instala dependencias en Azure
+          mkdir package
+          cp -r backend/* package/  # Asegurar que solo el backend se despliegue
+          cd package
+          zip -r ../release.zip ./*
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifact  # Nombre corregido para coincidir con la descarga
-          path: package/
+          name: release-artifact
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download artifact from build job
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: release-artifact  # Asegúrate que sea el mismo nombre que arriba
+          name: release-artifact
           path: package
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         id: deploy-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
-          app-name: "Deepseekmodel"  # Reemplaza con el nombre de tu Azure Web App
-          package: package/
+          app-name: 'Deepseekmodel'  # Reemplaza con el nombre de tu Azure Web App
+          package: 'package'

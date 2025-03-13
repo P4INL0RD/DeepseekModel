@@ -84,3 +84,16 @@ jobs:
           app-name: 'Deepseekmodel'
           package: release.zip
           
+      - name: Create startup.sh
+        run: |
+          echo '#!/bin/bash' > $GITHUB_WORKSPACE/startup.sh
+          echo 'cd /home/site/wwwroot' >> $GITHUB_WORKSPACE/startup.sh
+          echo 'source venv/bin/activate' >> $GITHUB_WORKSPACE/startup.sh
+          echo 'exec uvicorn main:app --host=0.0.0.0 --port=8000 --workers 1' >> $GITHUB_WORKSPACE/startup.sh
+          chmod +x $GITHUB_WORKSPACE/startup.sh
+
+      - name: Deploy startup.sh
+        uses: azure/webapps-deploy@v3
+        with:
+         app-name: 'Deepseekmodel'
+         package: './startup.sh'

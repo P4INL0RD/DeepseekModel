@@ -94,9 +94,10 @@ jobs:
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
-        id: deploy-webapp-deepseekmodel  
+        id: deploy-webapp
         with:
             app-name: 'Deepseekmodel'
+            package: './output.tar.gz'  # Asegúrate de que este archivo contiene tu solución
             slot-name: 'Production'
-            package: './release.zip'
+        
         

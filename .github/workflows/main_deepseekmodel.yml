@@ -49,5 +49,5 @@ jobs:
         id: deploy-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "tu-app-name"  # Reemplaza con el nombre de tu Azure Web App
+          app-name: "Deepseekmodel"  # Reemplaza con el nombre de tu Azure Web App
           package: package/

@@ -1,13 +1,14 @@
-name: Build and deploy Python app to Azure
+name: Build and deploy Python app to Azure App Service
 
 on:
   push:
     branches:
-      - main
+      - main  # Adjust to your branch name
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -17,47 +18,21 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and Start Virtual Environment
+      - name: Install Dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Package Application
+      - name: Create deployment package
         run: |
           mkdir package
-          cp -r * ./package
-          rm -rf package/venv  # Exclude virtual environment from packaging
-          cd package
-          tar -czf ../output.tar.gz .
+          cp -r backend/* package/
+          cp -r venv/ package/venv
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: output-artifact
-          path: output.tar.gz
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-webapp.outputs.webapp-url }}
-    steps:
-      - name: Download Artifact
-        id: download
-        uses: actions/download-artifact@v4
-        with:
-          name: output-artifact
-          path: deploy
-
-      - name: List downloaded files
-        run: ls -R deploy
-
-      - name: Deploy to Azure Web App
-        id: deploy-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'Deepseekmodel'
-          package: 'deploy/output.tar.gz'
+          path: package/

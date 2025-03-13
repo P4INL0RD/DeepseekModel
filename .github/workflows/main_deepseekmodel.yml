@@ -54,4 +54,3 @@ jobs:
           app-name: 'Deepseekmodel'
           package: 'deploy/release.zip'
 
-Try this updated workflow and let me know if you still face any issues!

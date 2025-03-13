@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.2:8081";
+const API_URL = "https://deepseekmodel-add0agb2abanc9eb.canadacentral-01.azurewebsites.net/";
 let isProcessing = false;
 let controller = null;
 

@@ -25,10 +25,10 @@ client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(
 
 app = FastAPI()
 
-# ✅ Fix CORS issue by allowing requests from your frontend (Adjust as needed)
+# ✅ CORS: Solo permitir solicitudes desde el frontend en Azure
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to ["http://127.0.0.1:5500"] for better security
+    allow_origins=["https://TU_AZURE_APP.azurewebsites.net"],  # Reemplazar con tu URL real
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,7 +38,7 @@ app.add_middleware(
 async def root():
     return {"message": "Bienvenido a la API de procesamiento de archivos y chat"}
 
-# ✅ Function to extract text from different file formats
+# ✅ Función para extraer texto de diferentes formatos de archivo
 def extract_text_from_file(file: UploadFile) -> str:
     try:
         content = file.file.read()
@@ -60,8 +60,8 @@ def extract_text_from_file(file: UploadFile) -> str:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al extraer texto: {str(e)}")
 
-# ✅ File Upload and Summarization Endpoint (returns JSON instead of file)
-@app.post("/process-file")
+# ✅ Endpoint corregido (ahora coincide con el frontend)
+@app.post("/process-file/")
 async def process_file(file: UploadFile = File(...)):
     try:
         file_text = extract_text_from_file(file)
@@ -88,7 +88,7 @@ async def process_file(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar el archivo: {str(e)}")
 
-# ✅ Chat Endpoint (returns JSON)
+# ✅ Chat Endpoint corregido
 @app.post("/chat")
 async def chat_with_ai(user_input: dict):
     try:

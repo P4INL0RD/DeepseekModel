@@ -22,7 +22,7 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
 
       - name: Zip artifact for deployment
         run: |
@@ -59,4 +59,4 @@ jobs:
         with:
           app-name: 'Deepseekmodel'  # Replace with your actual app name
           package: 'release.tar.gz'
-          restart-policy: always
+          restart-policy: always  

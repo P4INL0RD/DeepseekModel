@@ -28,7 +28,7 @@ app = FastAPI()
 # ✅ CORS: Solo permitir solicitudes desde el frontend en Azure
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://TU_AZURE_APP.azurewebsites.net"],  # Reemplazar con tu URL real
+    allow_origins=["https://deepseekmodel-add0agb2abanc9eb.canadacentral-01.azurewebsites.net/"],  # Reemplazar con tu URL real
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

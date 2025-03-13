@@ -18,25 +18,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and activate virtual environment
+      - name: Create and start virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Create package directory and archive
+      - name: Prepare package for deployment
         run: |
           mkdir package
-          cp -r . package/  # Copy all files to the package folder
-          tar -czf output.tar.gz -C package .  # Create tar.gz from package folder
+          cp -r $(ls -A | grep -v package) package/  # Copy all files except 'package'
+          tar -czf output.tar.gz -C package .  # Create tar.gz archive
           ls -lah  # List files for debugging
 
-      - name: Upload artifact for deployment
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: output-artifact
-          path: release.tar.gz
+          path: output.tar.gz
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,19 +51,11 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: output-artifact
+          name: output.tar.gz
           path: .
 
-      - name: Extract artifact
-        run: |
-          mkdir -p deploy
-          tar -xzf release.tar.gz -C deploy
-          ls -lah deploy  # Debugging: check extracted files
-
       - name: Deploy to Azure Web App
-        id: deploy-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'Deepseekmodel'  # Replace with your actual Azure Web App name
-          package: deploy
-          restart-policy: always
+          package: output.tar.gz

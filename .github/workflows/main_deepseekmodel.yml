@@ -1,4 +1,4 @@
-name: Build and Deploy Python App to Azure Web App
+name: Deploy to Azure Web App
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -18,23 +18,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create and start virtual environment
+      - name: Create and activate virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r backend/requirements.txt
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Zip artifact for deployment
+      - name: Create package directory and archive
         run: |
           mkdir package
-          cp -r * ./package/
-          cd package
-          tar -czf ../release.tar.gz .
-          
-      - name: Upload artifact
+          cp -r . package/  # Copy all files to the package folder
+          tar -czf output.tar.gz -C package .  # Create tar.gz from package folder
+          ls -lah  # List files for debugging
+
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: python-app
+          name: output-artifact
           path: release.tar.gz
 
   deploy:
@@ -51,12 +52,19 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: python-app
+          name: output-artifact
+          path: .
+
+      - name: Extract artifact
+        run: |
+          mkdir -p deploy
+          tar -xzf release.tar.gz -C deploy
+          ls -lah deploy  # Debugging: check extracted files
 
       - name: Deploy to Azure Web App
         id: deploy-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
-          app-name: 'Deepseekmodel'  # Replace with your actual app name
-          package: 'release.tar.gz'
-          restart-policy: always  
+          app-name: 'Deepseekmodel'  # Replace with your actual Azure Web App name
+          package: deploy
+          restart-policy: always

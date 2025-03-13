@@ -1,4 +1,4 @@
-name: Deploy to Azure Web App
+name: Build and deploy Python app to Azure
 
 on:
   push:
@@ -8,30 +8,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Create and start virtual environment
+      - name: Create and Start Virtual Environment
         run: |
           python -m venv venv
           source venv/bin/activate
+          pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Prepare package for deployment
+      - name: Package Application
         run: |
           mkdir package
-          cp -r $(ls -A | grep -v package) package/  # Copy all files except 'package'
-          tar -czf output.tar.gz -C package .  # Create tar.gz archive
-          ls -lah  # List files for debugging
+          cp -r * ./package
+          rm -rf package/venv  # Exclude virtual environment from packaging
+          cd package
+          tar -czf ../output.tar.gz .
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: output-artifact
@@ -43,19 +44,20 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      - name: Download artifact from build job
+      - name: Download Artifact
+        id: download
         uses: actions/download-artifact@v4
         with:
-          name: output.tar.gz
-          path: .
+          name: output-artifact
+          path: deploy
+
+      - name: List downloaded files
+        run: ls -R deploy
 
       - name: Deploy to Azure Web App
+        id: deploy-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'Deepseekmodel'  # Replace with your actual Azure Web App name
-          package: output.tar.gz
+          app-name: 'Deepseekmodel'
+          package: 'deploy/output.tar.gz'

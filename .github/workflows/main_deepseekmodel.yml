@@ -92,8 +92,11 @@ jobs:
           echo 'exec uvicorn main:app --host=0.0.0.0 --port=8000 --workers 1' >> $GITHUB_WORKSPACE/startup.sh
           chmod +x $GITHUB_WORKSPACE/startup.sh
 
-      - name: Deploy startup.sh
+      - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
+        id: deploy-webapp-deepseekmodel  
         with:
-         app-name: 'Deepseekmodel'
-         package: './startup.sh'
+            app-name: 'Deepseekmodel'
+            slot-name: 'Production'
+            package: './release.zip'
+        

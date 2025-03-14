@@ -10,16 +10,16 @@ import docx
 import io
 import re
 
-# Load environment variables
+# Cargar variables de entorno
 load_dotenv()
 
-# Azure AI Foundry Configuration
+# Configuración de Azure AI Foundry
 endpoint = os.getenv("AZURE_INFERENCE_SDK_ENDPOINT")
 model_name = os.getenv("DEPLOYMENT_NAME")
 key = os.getenv("AZURE_INFERENCE_SDK_KEY")
 
 if not endpoint or not key:
-    raise ValueError("Missing Azure AI Inference credentials in .env file")
+    raise ValueError("Faltan credenciales de Azure AI Inference en el archivo .env")
 
 client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
@@ -41,18 +41,19 @@ async def root():
 # ✅ Función para extraer texto de diferentes formatos de archivo
 def extract_text_from_file(file: UploadFile) -> str:
     try:
-        content = file.file.read()
+        content = io.BytesIO(file.file.read())  # Leer en memoria
+        file.file.seek(0)  # Restablecer cursor
 
         if file.filename.endswith(".pdf"):
-            pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
+            pdf_reader = PyPDF2.PdfReader(content)
             return " ".join([page.extract_text() or "" for page in pdf_reader.pages])
 
         elif file.filename.endswith(".docx"):
-            doc = docx.Document(io.BytesIO(content))
+            doc = docx.Document(content)
             return " ".join([para.text for para in doc.paragraphs])
 
         elif file.filename.endswith(".txt"):
-            return content.decode("utf-8")
+            return content.getvalue().decode("utf-8")
 
         else:
             raise HTTPException(status_code=400, detail="Formato de archivo no soportado.")
@@ -60,7 +61,7 @@ def extract_text_from_file(file: UploadFile) -> str:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al extraer texto: {str(e)}")
 
-# ✅ Endpoint corregido (ahora coincide con el frontend)
+# ✅ Endpoint corregido para procesar archivos
 @app.post("/process-file/")
 async def process_file(file: UploadFile = File(...)):
     try:
@@ -85,6 +86,8 @@ async def process_file(file: UploadFile = File(...)):
 
         return {"summary": cleaned_summary}
 
+    except HTTPException:
+        raise  # Dejar pasar los errores HTTP tal cual
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar el archivo: {str(e)}")
 
@@ -107,10 +110,12 @@ async def chat_with_ai(user_input: dict):
 
         return {"response": response.choices[0].message.content}
 
+    except HTTPException:
+        raise  # Dejar pasar errores HTTP sin cambios
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en el chat: {str(e)}")
 
-
+# ✅ Ejecución de FastAPI en modo local
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

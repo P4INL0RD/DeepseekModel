@@ -1,10 +1,10 @@
 fastapi
-uvicorn[gunicorn]
+uvicorn
 python-dotenv
 azure-ai-inference
 azure-core
 PyPDF2
 python-docx
-
+gunicorn
 
 

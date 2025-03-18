@@ -1,4 +1,4 @@
-const API_URL = "staticfunctiondeepseek.azurewebsites.net";
+const API_URL = "https://staticfunctiondeepseek.azurewebsites.net";
 let isProcessing = false;
 let controller = null;
 

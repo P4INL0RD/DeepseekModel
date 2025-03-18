@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 
-name: Build and deploy Python app to Azure Web App - deepseekai
+name: Build and deploy Python app to Azure Web App - Deepseekai
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Create and start virtual environment
         run: |
@@ -30,7 +30,7 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+        run: pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -68,14 +68,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E9723440FB804C6F9107EFDDEBADEB0D }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_71A535C5EFB54F0383CF41DAFDC61CC9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F7DD3BD0B0F241BCA75131DB779BBD7F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BA8228AE1B95482AAD6F55CC5A7DD564 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DD3A10915D6E4DB2A7D3333CE854E406 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D1898308654248E99AF8FF3D4D6233E7 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'deepseekai'
+          app-name: 'Deepseekai'
           slot-name: 'Production'
           

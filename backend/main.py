@@ -28,7 +28,7 @@ app = FastAPI()
 # ✅ CORS: Solo permitir solicitudes desde el frontend en Azure
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://deepseekai-e5gjepcycrc0ccfn.canadacentral-01.azurewebsites.net/"],  # Reemplazar con tu URL real
+    allow_origins=["*"],  # Reemplazar con tu URL real
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,7 +36,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Bienvenido a la API de procesamiento de archivos y chat"}
+    return {"message": "Bienvenido a la API de DeepSeek"}
 
 # ✅ Función para extraer texto de diferentes formatos de archivo
 def extract_text_from_file(file: UploadFile) -> str:

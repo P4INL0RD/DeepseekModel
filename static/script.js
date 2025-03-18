@@ -1,4 +1,4 @@
-const API_URL = "https://deepseekai-e5gjepcycrc0ccfn.canadacentral-01.azurewebsites.net/";
+const API_URL = "http://127.0.0.1:8000";
 let isProcessing = false;
 let controller = null;
 

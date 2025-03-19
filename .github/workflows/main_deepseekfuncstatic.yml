@@ -4,7 +4,6 @@
 
 name: Build and deploy Python project to Azure Function App - deepseekfuncstatic
 
-
 on:
   push:
     branches:
@@ -12,15 +11,14 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'release.zip' # Nombre del paquete a desplegar
-  AZURE_FUNCTIONAPP_NAME: 'staticfunctiondeepseek' # Nombre de la Function App en Azure
-  PYTHON_VERSION: '3.10' # Versión de Python utilizada
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  PYTHON_VERSION: '3.11' # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Requerido para acciones de checkout
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Checkout repository
@@ -37,28 +35,27 @@ jobs:
           source venv/bin/activate
 
       - name: Install dependencies
-        run: |
-         cd backend
-         pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
-      # - name: Run tests (Opcional)
-      #   run: pytest tests/
+      # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./* -x "venv/*"
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: release.zip
+          path: |
+            release.zip
+            !venv/
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write # Requerido para autenticación con Azure
-      contents: read # Requerido para checkout
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
@@ -68,16 +65,13 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip     
-
-      - name: Login to Azure
-        uses: azure/login@v2
         
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BE72AAEC7F4B4AFE8805DD358B7046EB }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_85AEBB4FD3F3410F9B565C96A536CE78 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_276E25E3AAAC434CA0070AA21A164714 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_2999D98E577A42C7B4766F60D670AA50 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FFA263CC37F747488DB414613E972D32 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_86C5BE88B0F245D19B006FFAD2AA177A }}
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
